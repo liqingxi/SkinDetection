@@ -38,7 +38,9 @@ int main()
     //正方形检测区域
     Mat skinCrCbHist_square = MatCrCbHist_square();
 
-    // imshow("检测矩阵", skinCrCbHist_square);
+    imshow("颜色区域矩形", skinCrCbHist_square);
+    imshow("颜色区域椭圆", skinCrCbHist_ellipse);
+
 
     Mat detect_ellipse = skin_detect(image, skinCrCbHist_ellipse);
     Mat detect_square = skin_detect(image, skinCrCbHist_square);
