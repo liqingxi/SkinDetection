@@ -4,6 +4,7 @@
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 # opencv library
 opencv_world*.dll
+opencv/
 
 # User-specific files
 *.rsuser

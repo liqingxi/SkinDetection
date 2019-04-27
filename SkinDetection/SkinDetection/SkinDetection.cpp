@@ -28,8 +28,8 @@ struct skinAreaInfo
 int main()
 {
     // 图片载入
-    Mat image = imread("1.jpg");
-    resize(image, image, Size(image.cols / 4, image.rows / 4));
+    Mat image = imread("6.jpg");
+    resize(image, image, Size(image.cols  , image.rows ));
 
 
     //生成肤色椭圆模型
@@ -44,7 +44,7 @@ int main()
     Mat detect_square = skin_detect(image, skinCrCbHist_square);
     imshow("原图", image);
     imshow("肤色检测图-椭圆区域", detect_ellipse);
-    imshow("肤色检测图-矩形区域", detect_square);
+    // imshow("肤色检测图-矩形区域", detect_square);
 
     // sobel算子获得梯度图像
     Mat grad = img_sobel(image);
@@ -57,7 +57,10 @@ int main()
     cvtColor(bwDetect_RGB, bwDetect,CV_RGB2GRAY );
     imshow("二值化-人脸", bwDetect);
 
-    skin_sobel_filter(bwDetect, grad);
+    Mat filtered = skin_sobel_filter(bwDetect, grad);
+    Mat filtered_detect;
+    image.copyTo(filtered_detect, filtered);//返回肤色图
+    imshow("综合考虑", filtered_detect);
     waitKey();
     return 0;
 }
@@ -112,7 +115,7 @@ Mat img_sobel(Mat &src) {
 */
 Mat skin_sobel_filter(Mat &src, Mat &sobel) {
     vector<vector<cv::Point>> contours;
-    Mat filtered;
+    Mat filtered = Mat::zeros(src.size(), CV_8UC1);
     // 找到轮廓，将边缘信息存储至contours
     findContours(src, contours, CV_RETR_EXTERNAL, CHAIN_APPROX_NONE);
 
@@ -123,7 +126,7 @@ Mat skin_sobel_filter(Mat &src, Mat &sobel) {
         double area = contourArea(c); // 计算轮廓面积
         double sum = 0; //
         vector<vector<Point>> t_contours;
-        if (area <= 0)
+        if (area <= 10)
             continue;
         // 在蒙版中画出该填充图形
         t_contours.push_back(c);
@@ -143,8 +146,20 @@ Mat skin_sobel_filter(Mat &src, Mat &sobel) {
                 sum += grad;
             }
         }
+        double smooth = sum / area;
+        double area_smooth = area / smooth;
 
-        cout << "平滑度：" << sum / area << " 面积：" << area << endl;
+        cout << "平滑度：" << smooth << " 面积：" << area;
+        if (smooth >= 5) {
+            cout << " 面积/平滑度：" << area_smooth << endl;
+        }
+        else cout << endl;
+        if (area_smooth >= 10)
+        {
+            drawContours(filtered, t_contours, -1, Scalar(255), CV_FILLED);
+
+        }
+
     }
     return filtered;
 }
